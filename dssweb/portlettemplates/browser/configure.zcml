@@ -1,0 +1,31 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="dssweb.portlettemplates">
+
+  <!-- Register resources -->
+  <browser:resource
+    name="portlettemplates.css"
+    file="resources/portlettemplates.css"
+    />
+  
+  <browser:resource
+    name="portlettabs.js"
+    file="resources/portlettabs.js"
+    />
+  <browser:resource
+    name="heightFix.js"
+    file="resources/heightFix.js"
+    />
+  
+  <configure zcml:condition="installed collective.portlet.ngcollection">
+  <include package="collective.portlet.ngcollection" file="meta.zcml" />
+  <plone:portletTemplates    
+      interface="collective.portlet.ngcollection.ngcollection.INGCollection"
+      directory="templates"
+      />
+  </configure>
+
+</configure>
