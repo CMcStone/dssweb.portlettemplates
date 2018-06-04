@@ -15,10 +15,7 @@
     name="portlettabs.js"
     file="resources/portlettabs.js"
     />
-  <browser:resource
-    name="heightFix.js"
-    file="resources/heightFix.js"
-    />
+  
   
   <configure zcml:condition="installed collective.portlet.ngcollection">
   <include package="collective.portlet.ngcollection" file="meta.zcml" />

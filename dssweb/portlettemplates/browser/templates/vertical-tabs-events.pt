@@ -1,17 +1,19 @@
 <tal:portlet tal:define="headerfull view/data/header;
                          header python:headerfull.replace(' ', '')">
 
-  <section class="portlet portletVerticalTabs"
+  <dl class="portlet portletVerticalTabs"
       i18n:domain="plone"
       tal:define="collection_url view/collection_url">
 
-    <header class="portletHeader">
+    <dt class="portletHeader">
+      <span class="portletTopLeft"></span>
       <a tal:attributes="href collection_url" tal:omit-tag="not:view/data/show_more">
         <span tal:content="view/data/header" />
       </a>
-    </header>
+      <span class="portletTopRight"></span>
+    </dt>
 
-    <section class="portletItem">
+    <dd class="portletItem">
       <div id="verticalTab"
            tal:attributes="id header">
 
@@ -34,51 +36,102 @@
                 <tal:block condition="python:item.portal_type in ['Image', 'News Item', 'Event']">
                   <img tal:define="obj item/getObject;"
                        tal:replace="structure obj/@@images/image/mini|nothing" />
-                </tal:block></a>
-                <span class="itemBlock itemDescription" tal:content="item/Description">
-                  Description
-                </span>
+                </tal:block>
                 <span class="itemBlock itemDate"
                       tal:define="toLocalizedTime nocall:context/@@plone/toLocalizedTime;
-                                  item_date python:view.formatted_date(item)
+                                  item_date item/Date;
                                   itemdate python:toLocalizedTime(item_date)"
                       tal:condition="view/data/show_dates"
                       tal:content="itemdate">
                   Date
                 </span>
-				<span class="itemLocation"
-					tal:define="item_location item/location"
-					tal:content="item_location"
-				</span>
-                
-              
+                <span class="itemBlock itemDescription" tal:content="item/Description">
+                  Description
+                </span>
+              </a>
+			  <metal:block metal:define-macro="document_byline" tal:define="
+				                       item_type item/Type;
+									   toLocalizedTime nocall:context/@@plone/toLocalizedTime;
+									   item_start python:(item.start or item.StartDate) if item_type == 'Event' else None;
+                                       item_end python:(item.end or item.EndDate) if item_type == 'Event' else None;
+                                       item_modified item/ModificationDate;
+                                       item_sametime python: item_start == item_end;
+                                       item_samedate python: (item_end - item_start &lt; 1) if item_type == 'Event' else False">
+			                          <span class="documentByLine">
+			                              <span tal:condition="python: item_type == 'Event' and item_sametime"
+			                                    i18n:translate="label_event_byline_onlyfrom">
+			                                   <abbr class="dtstart"
+			                                         tal:attributes="title python:item_start"
+			                                         tal:content="python:toLocalizedTime(item_start,long_format=1)"
+			                                         i18n:name="start">from date</abbr>
+			                              </span>
+			                              <span tal:condition="python: item_type == 'Event' and item_samedate and not item_sametime"
+			                                    i18n:translate="label_event_byline_samedate">
+			                                   <abbr class="dtstart"
+			                                         tal:attributes="title python:item_start"
+			                                         tal:content="python:toLocalizedTime(item_start)"
+			                                         i18n:name="start">from date</abbr> from
+			                                   <abbr class="dtstart"
+			                                         tal:attributes="title python:item_start"
+			                                         tal:content="python:toLocalizedTime(item_start,time_only=1)"
+			                                         i18n:name="starttime">from time</abbr> to
+			                                   <abbr class="dtend"
+			                                         tal:attributes="title python:item_end"
+			                                         tal:content="python:toLocalizedTime(item_end,time_only=1)"
+			                                         i18n:name="end">to time</abbr>
+			                              </span>
+			                              <span tal:condition="python: item_type == 'Event' and not item_samedate and not item_sametime"
+			                                    i18n:translate="label_event_byline">
+			                                    from
+			                                         <abbr class="dtstart"
+			                                         tal:attributes="title python:item_start"
+			                                         tal:content="python:toLocalizedTime(item_start,long_format=1)"
+			                                         i18n:name="start">from date</abbr> to
+			                                   <abbr class="dtend"
+			                                         tal:attributes="title python:item_end"
+			                                         tal:content="python:toLocalizedTime(item_end,long_format=1)"
+			                                         i18n:name="end">to date</abbr>
+			                              </span>
+			                               <span tal:condition="python: item_type == 'Event' and item.location"
+			                                    i18n:translate="label_event_byline_location">&mdash;
+			                                   <span tal:content="string:${item/location}"
+			                                         class="location"
+			                                         i18n:name="location">Oslo</span>,
+			                              </span>
+			                              
+											  </metal:block>
+			  
+			  
               <div class="visualClear"><!-- --></div>
             </div>
           </div>
         </div>
+
         <div class="visualClear"><!-- --></div>
       </div>
       <div class="visualClear"><!-- --></div>
-    </section>
+    </dd>
 
-    <footer class="portletFooter" tal:condition="view/data/show_more">
-      <a tal:attributes="href collection_url"
-         tal:content="structure view/show_more_label">
-        More&hellip;
-      </a>
-    </footer>
+    <dd class="portletFooter" tal:condition="view/data/show_more">
+      <span class="portletBottomLeft"></span>
+      <span>
+        <a tal:attributes="href collection_url"
+           tal:content="structure view/show_more_label">
+          More&hellip;
+        </a>
+      </span>
+      <span class="portletBottomRight"></span>
+    </dd>
 
-  </section>
-  
+  </dl>
+
   <tal:x replace="structure string:&lt;script type='text/javascript'&gt;"></tal:x>
-    require(['jquery', '++plone++slidertemplates/js/tabs', '++plone++slidertemplates/js/heightFix' ], function( $, tabs) {
-      $(document).ready(function() {
-          $("#<tal:x replace='header'></tal:x>").easyResponsiveTabs({
-              type: 'vertical',
-              width: 'auto',
-              fit: true
-          });
-      });
+    $(document).ready(function() {
+        $("#<tal:x replace='header'></tal:x>").easyResponsiveTabs({
+            type: 'vertical',
+            width: 'auto',
+            fit: true
+        });
     });
   <tal:x replace="structure string: &lt;/script&gt;" ></tal:x>
 
